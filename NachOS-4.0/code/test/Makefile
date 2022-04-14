@@ -112,11 +112,11 @@ ifeq ($(hosttype),unknown)
 PROGRAMS = unknownhost
 else
 # change this if you create a new test program!
-PROGRAMS = add halt shell matmult sort segments numio chario randomnum createfile test
+PROGRAMS = add halt shell matmult sort segments numio chario randomnum createfile
 # PROGRAMS = numio chario randomnum stringio help ascii sort createfile
 endif
 
-all: add halt shell matmult sort segments numio chario randomnum createfile stringio test
+all: add halt shell matmult sort segments numio chario randomnum createfile stringio
 # all: halt shell matmult sort createfile
 
 # Start
@@ -164,13 +164,6 @@ createfile.o: createfile.c
 createfile: createfile.o start.o
 	$(LD) $(LDFLAGS) start.o createfile.o -o createfile.coff
 	$(COFF2NOFF) createfile.coff createfile
-
-# test
-test.o: test.c
-	$(CC) $(CFLAGS) -c test.c
-test: test.o start.o
-	$(LD) $(LDFLAGS) start.o test.o -o test.coff
-	$(COFF2NOFF) test.coff test
 
 # Help
 help.o: help.c

@@ -445,7 +445,7 @@ void ExceptionHandler(ExceptionType which)
             // if OpenFileID is Console Input ID or Console Output ID
             if (id == 0 || id == 1)
             {
-                if (id == ConsoleIn) // if OpenFileId is ConsoleInput (id = 0)
+                if (id == ConsoleInput) // if OpenFileId is ConsoleInput (id = 0)
                 {
                     // read input value from keyboard and output into console
                     int numbytes = kernel->ReadConsole(buffer, size); // read input value from keyboard
@@ -465,7 +465,7 @@ void ExceptionHandler(ExceptionType which)
 
             // if OpenFileID >= 2
             int sizeBytes = kernel->fileSystem->fileTable[id]->Read(buffer, size); // read file content, add content into buffer and return bytes actually read
-            if (sizeBytes >= 0)
+            if (sizeBytes > 0)
             {
                 System2User(virtAddr, sizeBytes, buffer);
                 kernel->machine->WriteRegister(2, sizeBytes);
@@ -514,7 +514,7 @@ void ExceptionHandler(ExceptionType which)
 
             if (id == 0 || id == 1)
             {
-                if (id == ConsoleOut) // if OpenFileID is ConsoleOutput (id = 1)
+                if (id == ConsoleOutput) // if OpenFileID is ConsoleOutput (id = 1)
                 {
                     // Output buffer into console
                     if (buffer == NULL)
@@ -535,7 +535,9 @@ void ExceptionHandler(ExceptionType which)
 
             int numbytes = kernel->fileSystem->fileTable[id]->Write(buffer, size); // write content from char* buffer into opened file and return bytes actually write
             if (numbytes > 0)
+            {
                 kernel->machine->WriteRegister(2, numbytes);
+            }
             else
             {
                 cout << "Error write file" << endl;
@@ -583,7 +585,9 @@ void ExceptionHandler(ExceptionType which)
 
             // if position = -1 => user want to move file cursor in the end of file
             if (position == -1)
+            {
                 position = kernel->fileSystem->fileTable[id]->Length();
+            }
 
             // if position is invalid
             if (position > kernel->fileSystem->fileTable[id]->Length() || position < 0)
@@ -605,7 +609,7 @@ void ExceptionHandler(ExceptionType which)
             /* Remove a Nachos file, with name "name" */
             // int Remove(char *name);
             int virtAddr = kernel->machine->ReadRegister(4);
-            char *name = User2System(virtAddr, MaxFileLength + 1);
+            char *name = User2System(virtAddr, kernel->MaxBufferSize);
             bool isOpening = false;
 
             // if filename is NULL
@@ -641,13 +645,11 @@ void ExceptionHandler(ExceptionType which)
             bool result = kernel->fileSystem->Remove(name); // remove file from filename
             if (result)
             {
-                cout << "\nRemove " << name << " successfully !!!]\n";
                 DEBUG(dbgSys, "\nRemove " << name << " successfully !!!");
                 kernel->machine->WriteRegister(2, 0);
             }
             else
             {
-                cout << "\nRemove " << name << " failed !!!\n";
                 DEBUG(dbgSys, "\nRemove " << name << " failed !!!");
                 kernel->machine->WriteRegister(2, -1);
             }
